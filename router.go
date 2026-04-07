@@ -78,5 +78,5 @@ func (r *RouterHandle) HandleCrashTest(res http.ResponseWriter, req *http.Reques
 
 // AddRoute allows you to add new routes and handlers after initialization
 func (r *RouterHandle) AddRoute(path string, handler http.HandlerFunc) {
-    r.Routes[path] = handler
+	r.Routes[path] = handler
 }
