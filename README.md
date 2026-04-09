@@ -1,20 +1,90 @@
-### Библиотека go-custom-router-main на языке Go.
+# 🛡️ Go Simple Router with Recovery
 
-## License
-This project is licensed under the GNU Affero General Public License v3.0 (AGPLv3).
-See the [LICENSE](./LICENSE) file for details.
+Легкий, быстрый и устойчивый HTTP-роутер для приложений на Go.\
+Проект ориентирован на простоту, надежность и удобство расширения.
 
-# General Disclaimer / Общий отказ от ответственности
+![status: dev](https://img.shields.io/badge/status-dev-orange)\
+![Go Version](https://img.shields.io/badge/go-1.20%2B-blue.svg)\
+![License](https://img.shields.io/badge/license-GNU%20AGPLv3-red.svg)
 
-All repositories and code provided by my-app-s are provided **"as is"**, without any express or implied warranties.  
-By using any repository, you acknowledge and agree that the author or organization:
+------------------------------------------------------------------------
 
-- is not responsible for any direct or indirect damages,  
-- is not responsible for any loss of data,  
-- is not responsible for any legal claims or other consequences resulting from the use of these repositories or code.
+## 🚀 Основные возможности
 
-Use all repositories and code at your **own risk**.
+-   **Panic Recovery**\
+    Сервер не падает при ошибках --- используется `defer` + `recover`.
 
----
+-   **O(1) Routing**\
+    Мгновенный поиск маршрутов через `map`.
 
-![status: dev](https://img.shields.io/badge/status-dev-orange)
+-   **Built-in Diagnostics**\
+    Встроенный `/crashtest` для проверки отказоустойчивости.
+
+-   **Fluent API**\
+    Удобное добавление маршрутов через `AddRoute`.
+
+------------------------------------------------------------------------
+
+## 🛠️ Архитектура
+
+Роутер реализует интерфейс `http.Handler`, что позволяет использовать
+его напрямую в `http.ListenAndServe`.
+
+### Как работает `ServeHTTP`:
+
+1.  Инициализация `defer` + `recover`
+2.  Поиск маршрута в `map`
+3.  Вызов обработчика
+4.  Если маршрут не найден → `404 Not Found`
+
+------------------------------------------------------------------------
+
+## 📦 Стандартные маршруты
+
+  Путь           Описание               Формат ответа
+  -------------- ---------------------- -----------------------
+  `/`            Информация о запросе   Method, Host, Path
+  `/time`        Текущее время          `DD.MM.YYYY HH:MM:SS`
+  `/date`        Текущая дата           `DD.MM.YY`
+  `/crashtest`   Эмуляция аварии        Вызывает `panic`
+
+------------------------------------------------------------------------
+
+## 💻 Использование
+
+``` go
+package main
+
+import (
+    "net/http"
+    "github.com/my-app-s/go-custom-router/router"
+)
+
+func main() {
+    r := router.NewRouterHandle()
+
+    println("Server is running on :8080")
+    http.ListenAndServe(":8080", r)
+}
+```
+
+------------------------------------------------------------------------
+
+## 🧪 Тестирование
+
+``` bash
+go test -v
+go test -cover
+```
+
+------------------------------------------------------------------------
+
+## ⚠️ Disclaimer
+
+Код предоставляется "как есть". Используйте на свой риск.
+
+------------------------------------------------------------------------
+
+## 📜 License
+
+GNU AGPLv3
