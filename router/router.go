@@ -49,7 +49,7 @@ func (r *RouterHandle) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 // HandleMain responds with basic request information including
 // HTTP method, host, and path.
 func (r *RouterHandle) HandleMain(res http.ResponseWriter, req *http.Request) {
-	s := fmt.Sprintf("Method: %s\nHost: %s\nPath: %s",
+	s := fmt.Sprintf("Method: %s\nHost: %s\nPath: %s\n",
 		req.Method, req.Host, req.URL.Path)
 	res.Write([]byte(s))
 }
@@ -57,14 +57,14 @@ func (r *RouterHandle) HandleMain(res http.ResponseWriter, req *http.Request) {
 // HandleTime responds with the current system time
 // formatted as DD.MM.YYYY HH:MM:SS.
 func (r *RouterHandle) HandleTime(res http.ResponseWriter, req *http.Request) {
-	s := time.Now().Format("02.01.2006 15:04:05")
+	s := time.Now().Format("02.01.2006 15:04:05\n")
 	res.Write([]byte(s))
 }
 
 // HandleDate responds with the current system date
 // formatted as DD.MM.YY.
 func (r *RouterHandle) HandleDate(res http.ResponseWriter, req *http.Request) {
-	s := time.Now().Format("02.01.06")
+	s := time.Now().Format("02.01.06\n")
 	res.Write([]byte(s))
 }
 
