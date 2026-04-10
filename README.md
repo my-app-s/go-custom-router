@@ -26,7 +26,7 @@
     <summary>Example add new route</summary>
     
     ```go
-    router := gocustomrouter.New()
+    router := router.NewRouterHandle()
 
     router.
         AddRoute("GET", "/", HomeHandler).
