@@ -22,16 +22,6 @@
 
 -   **Fluent API**\
     Удобное добавление маршрутов через `AddRoute`.
-    <details>
-    <summary>Example add new route</summary>
-    
-    ```go
-    router := router.NewRouterHandle()
-
-    router.
-        AddRoute("GET", "/", HomeHandler).
-        AddRoute("POST", "/login", LoginHandler).
-        AddRoute("GET", "/profile", ProfileHandler)
 
 ------------------------------------------------------------------------
 
@@ -72,6 +62,10 @@ import (
 
 func main() {
     r := router.NewRouterHandle()
+    r.
+        AddRoute("GET", "/", HomeHandler).
+        AddRoute("POST", "/login", LoginHandler).
+        AddRoute("GET", "/profile", ProfileHandler)
 
     println("Server is running on :8080")
     http.ListenAndServe(":8080", r)
