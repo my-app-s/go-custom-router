@@ -76,9 +76,7 @@ func (r *RouterHandle) HandleCrashTest(res http.ResponseWriter, req *http.Reques
 	fmt.Println(list[99]) // exit to area list
 }
 
-// TODO add set method request
-// AddRoute allows you to add new routes and handlers after initialization
-// TODO edit docs
+// AddRoute registers a handler for the given path and returns the router handle.
 func (r *RouterHandle) AddRoute(path string, handler http.HandlerFunc) *RouterHandle {
 	r.Routes[path] = handler
 	return r
