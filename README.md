@@ -52,6 +52,8 @@
 
 ## 💻 Использование
 
+### Main example
+
 ``` go
 package main
 
@@ -62,11 +64,8 @@ import (
 
 func main() {
     r := router.NewRouterHandle()
+
     r.AddRoute("/main", MainHandler)
-    r.
-        AddRoute("/test", TestHandler).
-        AddRoute("/login", LoginHandler).
-        AddRoute("/profile", ProfileHandler)
 
     println("Server is running on :8080")
     http.ListenAndServe(":8080", r)
@@ -110,3 +109,10 @@ go test -cover
 ## 📜 License
 
 GNU AGPLv3
+
+### Handler signature
+Your handlers should match the `http.HandlerFunc` signature:
+```go
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("Hello, world!"))
+}
