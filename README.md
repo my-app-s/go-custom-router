@@ -62,14 +62,32 @@ import (
 
 func main() {
     r := router.NewRouterHandle()
+    r.AddRoute("/main", MainHandler)
     r.
-        AddRoute("GET", "/", HomeHandler).
-        AddRoute("POST", "/login", LoginHandler).
-        AddRoute("GET", "/profile", ProfileHandler)
+        AddRoute("/test", TestHandler).
+        AddRoute("/login", LoginHandler).
+        AddRoute("/profile", ProfileHandler)
 
     println("Server is running on :8080")
     http.ListenAndServe(":8080", r)
 }
+```
+
+### Flexible Route Registration
+You can register routes using a standard call or a **Fluent API** (method chaining). 
+Choose the style that fits your project best:
+
+``` go
+r := router.NewRouterHandle()
+
+// Standard style
+r.AddRoute("/main", MainHandler)
+
+// Fluent API style (Chaining)
+r.
+    AddRoute("/test", TestHandler).
+    AddRoute("/login", LoginHandler).
+    AddRoute("/profile", ProfileHandler)
 ```
 
 ------------------------------------------------------------------------
