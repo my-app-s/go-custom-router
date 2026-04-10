@@ -22,6 +22,16 @@
 
 -   **Fluent API**\
     Удобное добавление маршрутов через `AddRoute`.
+    <details>
+    <summary>Example add new route</summary>
+    
+    ```go
+    router := gocustomrouter.New()
+
+    router.
+        AddRoute("GET", "/", HomeHandler).
+        AddRoute("POST", "/login", LoginHandler).
+        AddRoute("GET", "/profile", ProfileHandler)
 
 ------------------------------------------------------------------------
 
