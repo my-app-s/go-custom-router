@@ -106,9 +106,27 @@ go test -cover
 
 ------------------------------------------------------------------------
 
-## ⚠️ Disclaimer
+## ⚠️ Disclaimer / Отказ от ответственности
 
-Код предоставляется "как есть". Используйте на свой риск.
+### English Version
+This project is an **independent development** provided on an **"AS IS"** basis.
+
+* **Liability:** In no event shall the author be liable for any errors, bugs, or data loss arising from the use of this software.
+* **Status:** This is an experimental tool. Always verify the generated HTML output before deployment.
+
+> [!CAUTION]
+> Any use (operation) of this code is at your own risk.
+
+---
+
+### Русская версия
+Данный проект является **независимой разработкой** и предоставляется «как есть».
+
+* **Ответственность:** Автор не несет ответственности за любые ошибки, баги или потерю данных, возникшие в результате использования данного кода.
+* **Статус:** Это экспериментальный инструмент. Проверяйте сгенерированный HTML перед деплоем.
+
+> [!CAUTION]
+> Любое использование (эксплуатация) данного кода осуществляется на ваш страх и риск.
 
 ------------------------------------------------------------------------
 
