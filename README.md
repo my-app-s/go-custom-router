@@ -3,9 +3,11 @@
 Легкий, быстрый и устойчивый HTTP-роутер для приложений на Go.\
 Проект ориентирован на простоту, надежность и удобство расширения.
 
-![status: dev](https://img.shields.io/badge/status-dev-orange)\
-![Go Version](https://img.shields.io/badge/go-1.20%2B-blue.svg)\
-![License](https://img.shields.io/badge/license-GNU%20AGPLv3-red.svg)
+> [!NOTE]
+> 
+> ![Go Version](https://img.shields.io/badge/go-1.25%2B-blue.svg)
+> ![License](https://img.shields.io/badge/license-GNU%20AGPLv3-red.svg)
+> ![status: dev](https://img.shields.io/badge/status-dev-orange)
 
 ------------------------------------------------------------------------
 
