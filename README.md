@@ -1,7 +1,10 @@
 # 🛡️ Go Simple Router with Recovery
 
-Легкий, быстрый и устойчивый HTTP-роутер для приложений на Go.\
-Проект ориентирован на простоту, надежность и удобство расширения.
+## Library Go my custom router
+
+Библиотека представляет собой минималистичный HTTP-роутер, реализованный поверх стандартной библиотеки Go.
+
+Вместо использования готовых решений проект демонстрирует собственную реализацию механизма маршрутизации.
 
 > [!NOTE]
 > 
@@ -110,17 +113,13 @@ go test -cover
 
 ## 📜 Disclaimer
 
-**English**: Materials are provided ***as is*** under the LICENSE file. No warranties, no rights granted unless explicitly stated. Authors are not liable for damages. No partnership or obligations created.  
+Materials are provided **as is** under the terms of the LICENSE file. No warranties are provided. The authors are not liable for any damages.
 
-**Русский**: Материалы предоставляются ***как есть*** и регулируются LICENSE. Гарантий нет, права не передаются без явного указания. Автор(ы) не несут ответственности. Партнёрство или обязательства не создаются.  
-
-📌 See full disclaimer in [DISCLAIMER.md](https://github.com/my-app-s/my-app-s/blob/main/DISCLAIMER.md)
-
-------------------------------------------------------------------------
+📌 See the full disclaimer in [DISCLAIMER.md](./DISCLAIMER.md).
 
 ## 📜 License
 
-GNU AGPLv3
+Licensed under the GNU AGPLv3. See the [LICENSE](./LICENSE) file for details.
 
 ### Handler signature
 Your handlers should match the `http.HandlerFunc` signature:
@@ -128,3 +127,17 @@ Your handlers should match the `http.HandlerFunc` signature:
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("Hello, world!"))
 }
+
+
+
+
+## Motivation
+
+The purpose of this project is educational.
+
+Instead of using chi or gorilla/mux, I wanted to understand how HTTP routing works internally and implement my own lightweight router using only net/http.
+
+
+TODO переделывать Все readme на на промт с ИИ:
+
+"ты сеньер разработчик и HR по IT, не придумывай если не знаешь"
