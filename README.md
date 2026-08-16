@@ -76,9 +76,13 @@ import (
 func main() {
     r := router.NewRouterHandle()
 
-    r.AddRoute("/main", MainHandler)
+    // Регистрируем нужные роуты снаружи
+    r.AddRoute("/", func(w http.ResponseWriter, req *http.Request) {
+        w.Write([]byte("Welcome to custom router!\n"))
+    })
 
-    println("Server is running on :8080")
+    r.AddRoute("/crashtest", r.HandleCrashTest)
+
     http.ListenAndServe(":8080", r)
 }
 ```
