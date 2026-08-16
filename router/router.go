@@ -7,10 +7,8 @@
 package router
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"time"
 )
 
 // RouterHandle stores a mapping of URL paths to handler functions.
@@ -22,7 +20,7 @@ type RouterHandle struct {
 // NewRouterHandle initializes a new, clean RouterHandle.
 func NewRouterHandle() *RouterHandle {
 	return &RouterHandle{
-		Routes: make(map[string]http.HandlerFunc)
+		Routes: make(map[string]http.HandlerFunc),
 	}
 }
 
