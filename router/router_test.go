@@ -1,6 +1,10 @@
-package router_test
+// Copyright (C) 2025-2026 my-app-s
+// Licensed under the GNU AGPLv3
+
+package router
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,6 +13,15 @@ import (
 
 func TestRouter(t *testing.T) {
 	r := NewRouterHandle()
+
+	// Регистрируем тестовые эндпоинты перед проверкой
+	r.AddRoute("/", func(w http.ResponseWriter, req *http.Request) {
+		s := fmt.Sprintf("Method: %s\nHost: %s\nPath: %s\n", req.Method, req.Host, req.URL.Path)
+		w.Write([]byte(s))
+	})
+	r.AddRoute("/time", func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("16.08.2026 12:00:00"))
+	})
 
 	// Табличное тестирование (Table-driven tests)
 	tests := []struct {
@@ -43,20 +56,15 @@ func TestRouter(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Создаем имитацию запроса
 			req := httptest.NewRequest(tt.method, tt.path, nil)
-			// Создаем инструмент для записи ответа
 			rr := httptest.NewRecorder()
 
-			// Вызываем ServeHTTP напрямую
 			r.ServeHTTP(rr, req)
 
-			// Проверяем статус-код
 			if rr.Code != tt.expectedStatus {
 				t.Errorf("expected status %d, got %d", tt.expectedStatus, rr.Code)
 			}
 
-			// Проверяем, содержит ли тело ответа ожидаемую строку
 			if !strings.Contains(rr.Body.String(), tt.expectedBody) {
 				t.Errorf("expected body to contain %q, got %q", tt.expectedBody, rr.Body.String())
 			}
@@ -67,21 +75,24 @@ func TestRouter(t *testing.T) {
 func TestRecovery(t *testing.T) {
 	r := NewRouterHandle()
 
+	// Регистрируем эндпоинт, который намеренно падает
+	r.AddRoute("/crashtest", func(w http.ResponseWriter, req *http.Request) {
+		var list []int
+		fmt.Println(list[99]) // паника из-за выхода за границы слайса
+	})
+
 	t.Run("Recovery from CrashTest", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/crashtest", nil)
 		rr := httptest.NewRecorder()
 
-		// Оборачиваем в проверку, чтобы тест не завершился аварийно сам по себе
-		// (хотя ServeHTTP уже содержит recover, это двойная проверка)
 		defer func() {
-			if r := recover(); r != nil {
+			if err := recover(); err != nil {
 				t.Errorf("The router did not recover from panic!")
 			}
 		}()
 
 		r.ServeHTTP(rr, req)
 
-		// Проверяем, что роутер перехватил панику и вернул 500
 		if rr.Code != http.StatusInternalServerError {
 			t.Errorf("expected status 500 after panic, got %d", rr.Code)
 		}
@@ -111,5 +122,22 @@ func TestAddRoute(t *testing.T) {
 	}
 	if rr.Body.String() != "custom handler" {
 		t.Errorf("expected 'custom handler', got %q", rr.Body.String())
+	}
+}
+
+// BenchmarkRouter измеряет скорость обработки запросов роутером и количество аллокаций памяти.
+func BenchmarkRouter(b *testing.B) {
+	r := NewRouterHandle()
+
+	r.AddRoute("/bench", func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("benchmark ok"))
+	})
+
+	req := httptest.NewRequest("GET", "/bench", nil)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		rr := httptest.NewRecorder()
+		r.ServeHTTP(rr, req)
 	}
 }

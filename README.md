@@ -69,29 +69,35 @@
 package main
 
 import (
+    "fmt"
     "net/http"
+    
     "github.com/my-app-s/go-custom-router/router"
 )
 
 func main() {
     r := router.NewRouterHandle()
 
-    // Регистрируем нужные роуты снаружи
+    // Registering routes externally
     r.AddRoute("/", func(w http.ResponseWriter, req *http.Request) {
         w.Write([]byte("Welcome to custom router!\n"))
     })
 
-    r.AddRoute("/crashtest", r.HandleCrashTest)
+    // Example of a route that causes a panic to test recovery
+    r.AddRoute("/crashtest", func(w http.ResponseWriter, req *http.Request) {
+        var list []int
+        fmt.Println(list[99]) // intentional out-of-bounds panic
+    })
 
     http.ListenAndServe(":8080", r)
 }
 ```
 
 ### Flexible Route Registration
-You can register routes using a standard call or a **Fluent API** (method chaining). 
-Choose the style that fits your project best:
 
-``` go
+You can register routes using a standard call or a **Fluent API** (method chaining). Choose the style that fits your project best:
+
+```go
 r := router.NewRouterHandle()
 
 // Standard style
@@ -113,6 +119,19 @@ go test -v
 go test -cover
 ```
 
+### Как запустить BenchmarkRouter:
+
+В терминале из папки с проектом выполните команду:
+
+```bash
+go test -bench=. -benchmem
+```
+
+> [!NOTE]
+> Этот флаг -benchmem покажет вам две важнейшие вещи:
+> - Сколько наносекунд занимает один запрос (ns/op).
+> - Сколько байт памяти выделяется на один запрос и сколько было аллокаций (B/op и allocs/op).
+
 ------------------------------------------------------------------------
 
 ## 📜 Disclaimer
@@ -131,17 +150,3 @@ Your handlers should match the `http.HandlerFunc` signature:
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("Hello, world!"))
 }
-
-
-
-
-## Motivation
-
-The purpose of this project is educational.
-
-Instead of using chi or gorilla/mux, I wanted to understand how HTTP routing works internally and implement my own lightweight router using only net/http.
-
-
-TODO переделывать Все readme на на промт с ИИ:
-
-"ты сеньер разработчик и HR по IT, не придумывай если не знаешь"
