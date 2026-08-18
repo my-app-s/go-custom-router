@@ -66,12 +66,6 @@ func main() {
         w.Write([]byte("Welcome to custom router!\n"))
     })
 
-    // Example of a route that causes a panic to test recovery
-    r.AddRoute("/crashtest", func(w http.ResponseWriter, req *http.Request) {
-        var list []int
-        fmt.Println(list[99]) // intentional out-of-bounds panic
-    })
-
     http.ListenAndServe(":8080", r)
 }
 ```
