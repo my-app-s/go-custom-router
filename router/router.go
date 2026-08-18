@@ -35,6 +35,12 @@ func (r *RouterHandle) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "Something broke on the server.", 500)
 		}
 	}()
+
+	// Realization CORS request
+	w.Hader().Set("Access-Control-Allow-Origin", "*")
+	w.Hader().Set("Access-Control-Allow-Methods", "GET, POST, OPRIONS")
+	w.Hader().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	if handler, ok := r.Routes[req.URL.Path]; ok {
 		handler(w, req)
 	} else {
