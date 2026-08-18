@@ -37,9 +37,9 @@ func (r *RouterHandle) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}()
 
 	// Realization CORS request
-	w.Hader().Set("Access-Control-Allow-Origin", "*")
-	w.Hader().Set("Access-Control-Allow-Methods", "GET, POST, OPRIONS")
-	w.Hader().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPRIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if handler, ok := r.Routes[req.URL.Path]; ok {
 		handler(w, req)
