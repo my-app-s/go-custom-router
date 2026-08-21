@@ -11,6 +11,8 @@
 > ![Go Version](https://img.shields.io/badge/go-1.25%2B-blue.svg)
 > ![License](https://img.shields.io/badge/license-GNU%20AGPLv3-red.svg)
 > ![status: dev](https://img.shields.io/badge/status-dev-orange)
+> ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-green)
+> ![CI](https://github.com/my-app-s/go-generator/actions/workflows/deploy.yml/badge.svg)
 
 ------------------------------------------------------------------------
 
@@ -112,21 +114,23 @@ go test -bench=. -benchmem
 > - Сколько наносекунд занимает один запрос (ns/op).
 > - Сколько байт памяти выделяется на один запрос и сколько было аллокаций (B/op и allocs/op).
 
-------------------------------------------------------------------------
-
-## 📜 Disclaimer
-
-Materials are provided **as is** under the terms of the LICENSE file. No warranties are provided. The authors are not liable for any damages.
-
-📌 See the full disclaimer in [DISCLAIMER.md](./DISCLAIMER.md).
-
-## 📜 License
-
-Licensed under the GNU AGPLv3. See the [LICENSE](./LICENSE) file for details.
-
 ### Handler signature
 Your handlers should match the `http.HandlerFunc` signature:
 ```go
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("Hello, world!"))
 }
+
+------------------------------------------------------------------------
+
+## Disclaimer & License
+
+- **Short Disclaimer (EN)**: Materials are provided ***as is*** under the LICENSE file. No warranties, no rights granted unless explicitly stated. Authors are not liable for damages. No partnership or obligations created.
+- **Short Disclaimer (RU)**: Материалы предоставляются ***как есть*** и регулируются LICENSE. Гарантий нет, права не передаются без явного указания. Автор(ы) не несут ответственности. Партнёрство или обязательства не создаются.
+- **Full Disclaimer**: Read the full text in the [DISCLAIMER.md](https://github.com/my-app-s/my-app-s/blob/main/DISCLAIMER.md) (Available in EN/RU).
+- **License**: Distributed under the [GNU AGPLv3](./LICENSE) license.
+
+## Author & Contacts
+
+- **GitHub**: [@my-app-s](https://github.com/my-app-s)
+- **LinkedIn**: [In/my-app-s](https://www.linkedin.com/in/my-app-s)
