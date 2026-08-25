@@ -48,3 +48,12 @@
   - Конструктор `NewRouterHandle()` с инициализацией карты маршрутов.
   - Диспетчер `ServeHTTP` с корректной обработкой статусов `404 Not Found` и `405 Method Not Allowed`.
   - Модульные тесты маршрутизации и кодов ответов (`router/router_test.go`).
+
+## [1.6.0] - 2026-08-26
+
+### Added
+- **Защита от флуда и DDoS (`router/rate_limiter.go`)**:
+  - `CustomRateLimiter` с алгоритмом временных окон и фоновой очисткой памяти.
+  - Извлечение реального IP из заголовков `CF-Connecting-IP`, `X-Forwarded-For` и очистка портов `RemoteAddr`.
+  - Middleware `RateLimitMiddleware()` с возвратом статуса `429 Too Many Requests`.
+  - Модульные и HTTP-тесты логики ограничений (`router/rate_limiter_test.go`).
