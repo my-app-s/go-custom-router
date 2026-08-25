@@ -28,4 +28,6 @@
   - Тесты изоляции паник (`TestRecoveryMiddleware`).
   - Проверка логирования и заголовков (`TestLoggerMiddleware`, `TestContentTypeJSONMiddleware`).
   - Тесты сборщиков цепочек (`TestRouterHandle_Handler`, `TestRouterHandle_HandlerAPI`).
-  
+
+### Changed
+- Обновлены заголовки авторских прав (Copyright 2025-2026) и указания лицензии GNU AGPLv3 в исходных файлах.
