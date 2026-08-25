@@ -76,3 +76,8 @@
 - Removed duplicate `RouterHandle` struct declaration in `router/middleware.go`
 - Fixed route registration and 404 errors in middleware tests by using `router.GET()`
 - Stabilized full-chain middleware tests (`Recovery`, `CORS`, `Logger`, `API`)
+
+## [1.6.7] - 2026-08-26
+
+### Fixed
+- Updated README structure and code blocks formatting
