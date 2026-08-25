@@ -66,3 +66,13 @@
   - `SendError()` для стандартизированных JSON-ошибок.
   - `MakeCustomHandler()` для генерации mock-хэндлеров и статических ответов.
   - Модульные тесты хелперов (`router/helpers_test.go`).
+
+## [1.6.6] - 2026-08-26
+### Added
+- Comprehensive architecture notes, TODOs, and developer examples in `README.md`
+- Dependency `golang.org/x/time` for rate limiting features
+
+### Fixed
+- Removed duplicate `RouterHandle` struct declaration in `router/middleware.go`
+- Fixed route registration and 404 errors in middleware tests by using `router.GET()`
+- Stabilized full-chain middleware tests (`Recovery`, `CORS`, `Logger`, `API`)
