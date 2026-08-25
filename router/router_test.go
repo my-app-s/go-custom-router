@@ -4,140 +4,65 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
-func TestRouter(t *testing.T) {
+// TestNewRouterHandle проверяет корректность инициализации нового роутера.
+func TestNewRouterHandle(t *testing.T) {
 	r := NewRouterHandle()
-
-	// Регистрируем тестовые эндпоинты перед проверкой
-	r.AddRoute("/", func(w http.ResponseWriter, req *http.Request) {
-		s := fmt.Sprintf("Method: %s\nHost: %s\nPath: %s\n", req.Method, req.Host, req.URL.Path)
-		w.Write([]byte(s))
-	})
-	r.AddRoute("/time", func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("16.08.2026 12:00:00"))
-	})
-
-	// Табличное тестирование (Table-driven tests)
-	tests := []struct {
-		name           string
-		method         string
-		path           string
-		expectedStatus int
-		expectedBody   string
-	}{
-		{
-			name:           "Home Page",
-			method:         "GET",
-			path:           "/",
-			expectedStatus: http.StatusOK,
-			expectedBody:   "Method: GET",
-		},
-		{
-			name:           "Time Page",
-			method:         "GET",
-			path:           "/time",
-			expectedStatus: http.StatusOK,
-			expectedBody:   ".", // Проверяем наличие точек в дате/времени
-		},
-		{
-			name:           "404 Not Found",
-			method:         "GET",
-			path:           "/unknown",
-			expectedStatus: http.StatusNotFound,
-			expectedBody:   "404 page not found",
-		},
+	if r == nil {
+		t.Fatal("expected non-nil RouterHandle")
 	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(tt.method, tt.path, nil)
-			rr := httptest.NewRecorder()
-
-			r.ServeHTTP(rr, req)
-
-			if rr.Code != tt.expectedStatus {
-				t.Errorf("expected status %d, got %d", tt.expectedStatus, rr.Code)
-			}
-
-			if !strings.Contains(rr.Body.String(), tt.expectedBody) {
-				t.Errorf("expected body to contain %q, got %q", tt.expectedBody, rr.Body.String())
-			}
-		})
+	if r.Routes == nil {
+		t.Error("expected initialized Routes map")
 	}
 }
 
-func TestRecovery(t *testing.T) {
+// TestServeHTTP_Routing проверяет корректность диспетчеризации запросов (200, 404, 405).
+func TestServeHTTP_Routing(t *testing.T) {
 	r := NewRouterHandle()
 
-	// Регистрируем эндпоинт, который намеренно падает
-	r.AddRoute("/crashtest", func(w http.ResponseWriter, req *http.Request) {
-		var list []int
-		fmt.Println(list[99]) // паника из-за выхода за границы слайса
+	// Регистрируем тестовые эндпоинты
+	r.GET("/api/ping", func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("pong"))
 	})
 
-	t.Run("Recovery from CrashTest", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/crashtest", nil)
-		rr := httptest.NewRecorder()
+	t.Run("200 OK - Successful Route Match", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/ping", nil)
+		rec := httptest.NewRecorder()
 
-		defer func() {
-			if err := recover(); err != nil {
-				t.Errorf("The router did not recover from panic!")
-			}
-		}()
+		r.ServeHTTP(rec, req)
 
-		r.ServeHTTP(rr, req)
-
-		if rr.Code != http.StatusInternalServerError {
-			t.Errorf("expected status 500 after panic, got %d", rr.Code)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)
 		}
-
-		expected := "Something broke on the server."
-		if !strings.Contains(rr.Body.String(), expected) {
-			t.Errorf("expected error message %q, got %q", expected, rr.Body.String())
+		if rec.Body.String() != "pong" {
+			t.Errorf("expected body 'pong', got %q", rec.Body.String())
 		}
 	})
-}
 
-func TestAddRoute(t *testing.T) {
-	r := NewRouterHandle()
-	path := "/custom"
+	t.Run("404 Not Found - Path Does Not Exist", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/unknown", nil)
+		rec := httptest.NewRecorder()
 
-	r.AddRoute(path, func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("custom handler"))
+		r.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusNotFound {
+			t.Errorf("expected status %d, got %d", http.StatusNotFound, rec.Code)
+		}
 	})
 
-	req := httptest.NewRequest("GET", path, nil)
-	rr := httptest.NewRecorder()
+	t.Run("405 Method Not Allowed - Unregistered HTTP Method", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/api/ping", nil)
+		rec := httptest.NewRecorder()
 
-	r.ServeHTTP(rr, req)
+		r.ServeHTTP(rec, req)
 
-	if rr.Code != http.StatusOK {
-		t.Errorf("expected status 200, got %d", rr.Code)
-	}
-	if rr.Body.String() != "custom handler" {
-		t.Errorf("expected 'custom handler', got %q", rr.Body.String())
-	}
-}
-
-// BenchmarkRouter измеряет скорость обработки запросов роутером и количество аллокаций памяти.
-func BenchmarkRouter(b *testing.B) {
-	r := NewRouterHandle()
-
-	r.AddRoute("/bench", func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte("benchmark ok"))
+		if rec.Code != http.StatusMethodNotAllowed {
+			t.Errorf("expected status %d, got %d", http.StatusMethodNotAllowed, rec.Code)
+		}
 	})
-
-	req := httptest.NewRequest("GET", "/bench", nil)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		rr := httptest.NewRecorder()
-		r.ServeHTTP(rr, req)
-	}
 }

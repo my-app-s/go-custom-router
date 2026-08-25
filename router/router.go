@@ -3,7 +3,6 @@
 
 // Package router provides a simple custom HTTP router
 // for handling requests in Go applications.
-
 package router
 
 import (
@@ -11,45 +10,44 @@ import (
 	"net/http"
 )
 
-// RouterHandle stores a mapping of URL paths to handler functions.
-// It implements the http.Handler interface.
+// RouterHandle хранит карту маршрутов (URL-путь -> HTTP-метод -> HandlerFunc)
+// и конфигурацию CORS. Реализует интерфейс http.Handler.
 type RouterHandle struct {
-	Routes map[string]http.HandlerFunc
+	// Routes: карта [Path][Method]http.HandlerFunc
+	Routes map[string]map[string]http.HandlerFunc `json:"routes"`
+
+	// CORS содержит настройки междоменного доступа (CORS).
+	// Если равна nil, цепочка middleware автоматически использует CorsMiddlewareOpen.
+	CORS *CORS `json:"cors,omitempty"`
 }
 
-// NewRouterHandle initializes a new, clean RouterHandle.
+// NewRouterHandle инициализирует новый экземпляр RouterHandle с пустой картой маршрутов.
 func NewRouterHandle() *RouterHandle {
 	return &RouterHandle{
-		Routes: make(map[string]http.HandlerFunc),
+		Routes: make(map[string]map[string]http.HandlerFunc),
 	}
 }
 
-// ServeHTTP dispatches incoming requests to the appropriate handler
-// based on the request path. It includes panic recovery to ensure
-// the server remains stable if a handler crashes, returning a 500 status.
-// If no handler is found, it returns 404 Not Found.
+// ServeHTTP выполняет диспетчеризацию входящих HTTP-запросов к соответствующим обработчикам.
+// Если путь не найден — возвращает статус 404 Not Found.
+// Если путь найден, но метод не зарегистрирован — возвращает статус 405 Method Not Allowed.
 func (r *RouterHandle) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Printf("Critical error: %v", err)
-			http.Error(w, "Something broke on the server.", 500)
-		}
-	}()
+	log.Printf("[%s] %s", req.Method, req.URL.Path)
 
-	// Realization CORS request
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPRIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-	if handler, ok := r.Routes[req.URL.Path]; ok {
-		handler(w, req)
-	} else {
+	// 1. Проверяем, существует ли сам путь
+	methods, pathExists := r.Routes[req.URL.Path]
+	if !pathExists {
 		http.NotFound(w, req)
+		return
 	}
-}
 
-// AddRoute registers a handler for the given path and returns the router handle.
-func (r *RouterHandle) AddRoute(path string, handler http.HandlerFunc) *RouterHandle {
-	r.Routes[path] = handler
-	return r
+	// 2. Проверяем, зарегистрирован ли HTTP-метод для этого пути
+	handler, methodExists := methods[req.Method]
+	if !methodExists {
+		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// 3. Вызываем целевой обработчик
+	handler(w, req)
 }
