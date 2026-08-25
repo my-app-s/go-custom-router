@@ -16,7 +16,6 @@
 > ![REST API](https://img.shields.io/badge/REST%20API-green)
 > ![Latest Tag](https://img.shields.io/github/v/tag/my-app-s/go-custom-router)
 
-
 * Example
 
 ```go
