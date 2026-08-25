@@ -49,7 +49,7 @@
   - Диспетчер `ServeHTTP` с корректной обработкой статусов `404 Not Found` и `405 Method Not Allowed`.
   - Модульные тесты маршрутизации и кодов ответов (`router/router_test.go`).
 
-## [1.6.0] - 2026-08-26
+## [1.6.4] - 2026-08-26
 
 ### Added
 - **Защита от флуда и DDoS (`router/rate_limiter.go`)**:
@@ -57,3 +57,12 @@
   - Извлечение реального IP из заголовков `CF-Connecting-IP`, `X-Forwarded-For` и очистка портов `RemoteAddr`.
   - Middleware `RateLimitMiddleware()` с возвратом статуса `429 Too Many Requests`.
   - Модульные и HTTP-тесты логики ограничений (`router/rate_limiter_test.go`).
+
+## [1.6.5] - 2026-08-26
+
+### Added
+- **Вспомогательные функции (`router/helpers.go`)**:
+  - `SendJSON()` для кодирования и отправки JSON-ответов.
+  - `SendError()` для стандартизированных JSON-ошибок.
+  - `MakeCustomHandler()` для генерации mock-хэндлеров и статических ответов.
+  - Модульные тесты хелперов (`router/helpers_test.go`).
