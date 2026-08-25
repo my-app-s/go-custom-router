@@ -14,6 +14,8 @@
 > ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-green)
 > ![CI](https://github.com/my-app-s/go-generator/actions/workflows/deploy.yml/badge.svg)
 > ![REST API](https://img.shields.io/badge/REST%20API-green)
+> ![Latest Tag](https://img.shields.io/github/v/tag/my-app-s/go-custom-router)
+
 
 * Example
 
