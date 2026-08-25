@@ -14,3 +14,18 @@
   - Тест инициализации конструктора (`TestNewCORS`).
   - Проверка корректности работы с дубликатами (`TestMultiAddOrigin`).
   - Интеграционные HTTP-тесты с использованием `httptest.NewRecorder` для проверки заголовков ответа и метода `OPTIONS` (`TestCorsMiddleware`, `TestCorsMiddlewareOpen`).
+
+## [1.5.2] - 2026-08-26
+
+### Added
+- **Модуль Middleware (`router/middleware.go`)**:
+  - `RecoveryMiddleware()` — перехват паник (`panic`) с логированием stack trace и возвратом 500 Internal Server Error.
+  - `LoggerMiddleware()` — логирование HTTP-методов, путей и времени выполнения запроса (`[START]` / `[DONE]`).
+  - `ContentTypeJSONMiddleware()` — автоматическая установка заголовка `Content-Type: application/json; charset=utf-8`.
+  - Методы `Handler()` и `HandlerAPI()` для автоматической сборки цепочек middleware внутри `RouterHandle`.
+  - Полная GoDoc-документация для всех экспортируемых функций и методов.
+- **Тестирование (`router/middleware_test.go`)**:
+  - Тесты изоляции паник (`TestRecoveryMiddleware`).
+  - Проверка логирования и заголовков (`TestLoggerMiddleware`, `TestContentTypeJSONMiddleware`).
+  - Тесты сборщиков цепочек (`TestRouterHandle_Handler`, `TestRouterHandle_HandlerAPI`).
+  
