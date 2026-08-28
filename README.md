@@ -1,6 +1,6 @@
 # 🛡️ Go Custom Router
 
-Библиотека представляет собой легковесный, высокопроизводительный HTTP-роутер и набор утилит, реализованных поверх стандартной библиотеки Go (`net/http`), без использования сторонних тяжеловесных фреймворков.
+The library is a lightweight, high-performance HTTP router and set of utilities implemented on top of the standard Go library (`net/http`), without the use of third-party heavyweight frameworks.
 
 ---
 
@@ -16,36 +16,36 @@
 
 ---
 
-## 🚀 Основные возможности
+## 🚀 Main features
 
-* **$O(1)$ Average-Case Routing**: Поиск маршрутов и методов основан на встроенных хэш-таблицах Go (`map`), что обеспечивает максимальную скорость диспетчеризации.
-* **Fluent API**: Удобная цепочка вызовов (method chaining) для быстрой регистрации маршрутов (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`).
-* **Встроенный Rate Limiter**: Защита от DDoS и брутфорса на базе алгоритма *Sliding Window Counter* с автоматической очисткой старых записей воркером и поддержкой заголовков прокси (`CF-Connecting-IP`, `X-Forwarded-For`).
-* **Middleware-пакет**: 
-  - `RecoveryMiddleware` — перехват паник с логированием стека вызовов и возвратом `500 Internal Server Error`.
-  - `LoggerMiddleware` — структурированное логирование времени выполнения и статусов запросов.
-  - `ContentTypeJSONMiddleware` — автоматическая установка заголовка `application/json`.
-* **Гибкий CORS**: Настройка разрешенных источников, методов, заголовков и предварительных запросов (`OPTIONS`).
-* **JSON Helpers**: Удобные функции `SendJSON`, `SendError` и `MakeCustomHandler` для быстрой генерации ответов.
-
----
-
-## 🛠️ Архитектура
-
-Роутер полностью реализует стандартный интерфейс `http.Handler`, что позволяет бесшовно интегрировать его с любыми стандартными инструментами, балансировщиками и функциями тестирования (`net/http/httptest`).
-
-### Порядок обработки запроса:
-1. Логирование входящего запроса (`Logger`).
-2. Перехват возможных паник (`Recovery`).
-3. Установка заголовков (`CORS`, `Content-Type`).
-4. Поиск совпадения по методу и пути в роутере.
-5. Вызов целевого обработчика или возврат `404 Not Found` / `405 Method Not Allowed`.
+* **$O(1)$ Average-Case Routing**: Route and method lookup is based on Go's built-in hash tables (`map`) for maximum dispatch speed.
+* **Fluent API**: Convenient method chaining for quick registration of routes (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`).
+* **Built-in Rate Limiter**: Protection against DDoS and brute force based on the *Sliding Window Counter* algorithm with automatic cleaning of old records by the worker and support for proxy headers (`CF-Connecting-IP`, `X-Forwarded-For`).
+* **Middleware package**: 
+- `RecoveryMiddleware` - intercepting panics with call stack logging and returning `500 Internal Server Error`. 
+- `LoggerMiddleware` - structured logging of execution time and request statuses. 
+- `ContentTypeJSONMiddleware` - automatic setting of the `application/json` header.
+* **Flexible CORS**: Configure allowed origins, methods, headers and pre-requests (`OPTIONS`).
+* **JSON Helpers**: Convenient functions `SendJSON`, `SendError` and `MakeCustomHandler` for quickly generating responses.
 
 ---
 
-## 💻 Примеры использования
+## 🛠️ Architecture
 
-### Базовый запуск с Fluent API
+The router fully implements the standard `http.Handler` interface, which allows it to be seamlessly integrated with any standard tools, balancers and testing functions (`net/http/httptest`).
+
+### Request processing order:
+1. Logging an incoming request (`Logger`).
+2. Intercepting possible panics (`Recovery`).
+3. Setting headers (`CORS`, `Content-Type`).
+4. Search for a match by method and path in the router.
+5. Calling the target handler or returning `404 Not Found` / `405 Method Not Allowed`.
+
+---
+
+## 💻 Examples of use
+
+### Basic launch with Fluent API
 
 ```go
 package main
@@ -54,13 +54,13 @@ import (
 	"log"
 	"net/http"
 
-	"[github.com/my-app-s/go-custom-router/router](https://github.com/my-app-s/go-custom-router/router)"
+	"github.com/my-app-s/go-custom-router/router"
 )
 
 func main() {
 	r := router.NewRouter()
 
-	// Регистрация маршрутов через Fluent API
+	// Register routes via Fluent API
 	r.
 		GET("/", func(w http.ResponseWriter, req *http.Request) {
 			_, _ = w.Write([]byte("Welcome to Go Custom Router!\n"))
@@ -75,7 +75,7 @@ func main() {
 
 ```
 
-### Использование Rate Limiter Middleware
+### Using Rate Limiter Middleware
 
 ```go
 package main
@@ -85,13 +85,13 @@ import (
 	"net/http"
 	"time"
 
-	"[github.com/my-app-s/go-custom-router/router](https://github.com/my-app-s/go-custom-router/router)"
+	"github.com/my-app-s/go-custom-router/router"
 )
 
 func main() {
 	r := router.NewRouter()
 
-	// Лимит: 100 запросов в минуту на один IP
+	// Limit: 100 requests per minute per IP
 	limiter := router.NewLimiter(100, 1*time.Minute, 5*time.Minute, 10000)
 	defer limiter.Stop()
 
@@ -99,7 +99,7 @@ func main() {
 		router.SendJSON(w, http.StatusOK, map[string]string{"message": "Success"})
 	})
 
-	// Оборачиваем роутер или конкретный эндпоинт в лимитер
+	// Wrap the router or a specific endpoint in the limiter
 	handler := router.RateLimitMiddleware(limiter)(r)
 
 	log.Println("Rate-limited server running on :8080...")
@@ -110,9 +110,9 @@ func main() {
 
 ---
 
-## 🧪 Тестирование
+## 🧪 Testing
 
-Проект покрыт модульными тестами с использованием встроенного пакета `httptest`. Для запуска тестов выполните:
+The project is covered with unit tests using the built-in `httptest` package. To run tests run:
 
 ```bash
 go test -v ./...
@@ -135,3 +135,4 @@ go test -cover
 
 * **GitHub**: [@my-app-s](https://github.com/my-app-s)
 * **LinkedIn**: [In/my-app-s](https://www.linkedin.com/in/my-app-s)
+* **Mail**: [myapps.mre.dev@gmail.com](mailto:myapps.mre.dev@gmail.com)
