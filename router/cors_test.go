@@ -41,7 +41,7 @@ func TestNewCORS(t *testing.T) {
 }
 
 func TestAddOrigin(t *testing.T) {
-	test := []struct {
+	testCases := []struct {
 		name        string
 		input       inputCORS
 		checkOrigin string
@@ -83,7 +83,7 @@ func TestAddOrigin(t *testing.T) {
 		},
 	}
 
-	for _, tt := range test {
+	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			cors := NewCORS()
 
@@ -98,14 +98,15 @@ func TestAddOrigin(t *testing.T) {
 			}
 
 			if tt.wantSuccess {
-				if _, exists := cors.AllowedOrigins[tt.want.origin]; !exists {
-					t.Errorf("origin %q not found in AllowedOrigins map", tt.want.origin)
+				opt, exists := cors.AllowedOrigins[tt.want.origin]
+				if !exists {
+					t.Fatalf("origin %q not found in AllowedOrigins map", tt.want.origin)
 				}
-				if cors.AllowedMethods != tt.want.methods {
-					t.Errorf("AllowedMethods = %q; want %q", cors.AllowedMethods, tt.want.methods)
+				if opt.AllowedMethods != tt.want.methods {
+					t.Errorf("AllowedMethods = %q; want %q", opt.AllowedMethods, tt.want.methods)
 				}
-				if cors.AllowedHeaders != tt.want.headers {
-					t.Errorf("AllowedHeaders = %q; want %q", cors.AllowedHeaders, tt.want.headers)
+				if opt.AllowedHeaders != tt.want.headers {
+					t.Errorf("AllowedHeaders = %q; want %q", opt.AllowedHeaders, tt.want.headers)
 				}
 			}
 		})
@@ -119,7 +120,7 @@ func TestMultiAddOrigin(t *testing.T) {
 
 	count := len(cors.AllowedOrigins)
 	if count != 1 {
-		t.Errorf("[%s] count = %v; want: %d", "Add origin duplicate", count, 1)
+		t.Errorf("Add origin duplicate count = %v; want: %d", count, 1)
 	}
 }
 
@@ -145,6 +146,9 @@ func TestCorsMiddleware(t *testing.T) {
 		}
 		if got := rec.Header().Get("Access-Control-Allow-Origin"); got != "https://my-app.com" {
 			t.Errorf("Access-Control-Allow-Origin = %q; want %q", got, "https://my-app.com")
+		}
+		if got := rec.Header().Get("Access-Control-Allow-Methods"); got != "GET, POST" {
+			t.Errorf("Access-Control-Allow-Methods = %q; want %q", got, "GET, POST")
 		}
 	})
 

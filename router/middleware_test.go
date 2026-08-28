@@ -90,18 +90,17 @@ func TestContentTypeJSONMiddleware(t *testing.T) {
 	}
 }
 
-// TestRouterHandle_Handler проверяет базовую цепочку middleware без JSON заголовка.
-func TestRouterHandle_Handler(t *testing.T) {
+// TestRouter_HandlerAPI проверяет полную цепочку middleware для JSON API.
+func TestRouter_HandlerAPI(t *testing.T) {
 	t.Run("Default CORS (Nil)", func(t *testing.T) {
-		router := NewRouterHandle()
-		router.CORS = nil
+		r := NewRouter()
+		r.CORS = nil
 
-		// Используем правильный метод с большой буквы GET
-		router.GET("/test", func(w http.ResponseWriter, r *http.Request) {
+		r.GET("/test", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		handler := router.Handler()
+		handler := r.HandlerAPI()
 
 		req := httptest.NewRequest(http.MethodGet, "/test", nil)
 		rec := httptest.NewRecorder()
@@ -121,14 +120,14 @@ func TestRouterHandle_Handler(t *testing.T) {
 		cors := NewCORS()
 		_ = cors.AddOrigin("https://example.com", "GET, POST, PUT, DELETE, OPTIONS", "Content-Type, Authorization")
 
-		router := NewRouterHandle()
-		router.CORS = cors
+		r := NewRouter()
+		r.CORS = cors
 
-		router.GET("/test", func(w http.ResponseWriter, r *http.Request) {
+		r.GET("/test", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		handler := router.Handler()
+		handler := r.HandlerAPI()
 
 		req := httptest.NewRequest(http.MethodGet, "/test", nil)
 		req.Header.Set("Origin", "https://example.com")
@@ -142,13 +141,13 @@ func TestRouterHandle_Handler(t *testing.T) {
 	})
 
 	t.Run("Panic Handling in Full Chain", func(t *testing.T) {
-		router := NewRouterHandle()
+		r := NewRouter()
 
-		router.GET("/panic", func(w http.ResponseWriter, r *http.Request) {
+		r.GET("/panic", func(w http.ResponseWriter, r *http.Request) {
 			panic("test panic error")
 		})
 
-		handler := router.Handler()
+		handler := r.HandlerAPI()
 
 		req := httptest.NewRequest(http.MethodGet, "/panic", nil)
 		rec := httptest.NewRecorder()
@@ -159,30 +158,4 @@ func TestRouterHandle_Handler(t *testing.T) {
 			t.Errorf("expected status %d on panic, got %d", http.StatusInternalServerError, rec.Code)
 		}
 	})
-}
-
-// TestRouterHandle_HandlerAPI проверяет полную цепочку middleware для JSON API.
-func TestRouterHandle_HandlerAPI(t *testing.T) {
-	router := NewRouterHandle()
-	router.CORS = nil
-
-	router.GET("/api/status", func(w http.ResponseWriter, r *http.Request) {
-		SendJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-	})
-
-	handler := router.HandlerAPI()
-
-	req := httptest.NewRequest(http.MethodGet, "/api/status", nil)
-	rec := httptest.NewRecorder()
-
-	handler.ServeHTTP(rec, req)
-
-	if rec.Code != http.StatusOK {
-		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)
-	}
-
-	expectedContentType := "application/json; charset=utf-8"
-	if rec.Header().Get("Content-Type") != expectedContentType {
-		t.Errorf("expected Content-Type %q, got %q", expectedContentType, rec.Header().Get("Content-Type"))
-	}
 }

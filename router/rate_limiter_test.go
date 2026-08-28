@@ -12,8 +12,10 @@ import (
 
 // TestCustomRateLimiter_Allow проверяет логику блокировки и сброса окна.
 func TestCustomRateLimiter_Allow(t *testing.T) {
-	// Лимит: 2 запроса в 100мс
-	limiter := NewCustomRateLimiter(2, 100*time.Millisecond, 1*time.Minute)
+	// Лимит: 2 запроса в 100мс, максимальное число уникальных IP: 1000
+	limiter := NewLimiter(2, 100*time.Millisecond, 1*time.Minute, 1000)
+	defer limiter.Stop() // Останавливаем воркер после теста
+
 	ip := "192.168.1.1"
 
 	if !limiter.Allow(ip) {
@@ -36,7 +38,9 @@ func TestCustomRateLimiter_Allow(t *testing.T) {
 
 // TestRateLimitMiddleware проверяет работу middleware и статусы HTTP 429.
 func TestRateLimitMiddleware(t *testing.T) {
-	limiter := NewCustomRateLimiter(1, 1*time.Second, 1*time.Minute)
+	limiter := NewLimiter(1, 1*time.Second, 1*time.Minute, 1000)
+	defer limiter.Stop() // Останавливаем воркер после теста
+
 	middleware := RateLimitMiddleware(limiter)
 
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

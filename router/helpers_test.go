@@ -37,6 +37,32 @@ func TestSendJSON(t *testing.T) {
 	}
 }
 
+// TestSendError проверяет отправку стандартного JSON-формата ошибки.
+func TestSendError(t *testing.T) {
+	rec := httptest.NewRecorder()
+	errorMessage := "something went wrong"
+
+	SendError(rec, http.StatusBadRequest, errorMessage)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("expected status 400 Bad Request, got %d", rec.Code)
+	}
+
+	contentType := rec.Header().Get("Content-Type")
+	if !strings.Contains(contentType, "application/json") {
+		t.Errorf("expected Content-Type application/json, got %q", contentType)
+	}
+
+	var res map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
+		t.Fatalf("failed to parse error response JSON: %v", err)
+	}
+
+	if res["error"] != errorMessage {
+		t.Errorf("expected error message %q, got %q", errorMessage, res["error"])
+	}
+}
+
 // TestMakeCustomHandler проверяет фабрику хэндлеров.
 func TestMakeCustomHandler(t *testing.T) {
 	handler := MakeCustomHandler("service", "router-api")
@@ -51,7 +77,9 @@ func TestMakeCustomHandler(t *testing.T) {
 	}
 
 	var res map[string]string
-	_ = json.Unmarshal(rec.Body.Bytes(), &res)
+	if err := json.Unmarshal(rec.Body.Bytes(), &res); err != nil {
+		t.Fatalf("failed to parse custom handler response JSON: %v", err)
+	}
 
 	if res["service"] != "router-api" {
 		t.Errorf("expected service='router-api', got %q", res["service"])

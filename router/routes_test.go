@@ -5,50 +5,29 @@ package router
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
-// TestAddRoute_And_FluentAPI проверяет регистрацию маршрутов через AddRoute и helpers (GET, POST, PUT, DELETE).
-func TestAddRoute_And_FluentAPI(t *testing.T) {
-	dummyHandler := func(w http.ResponseWriter, r *http.Request) {}
+// TestRoutes проверяет регистрацию маршрутов через Handle и вызов через ServeHTTP.
+func TestRoutes(t *testing.T) {
+	testHandler := http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("Test Handle"))
+	})
 
-	r := &RouterHandle{
-		Routes: make(map[string]map[string]http.HandlerFunc),
-	}
+	r := NewRouter()
+	r.Handle(http.MethodGet, "/", testHandler)
 
-	// Проверяем работу цепочки вызовов (Fluent API)
-	r.GET("/users", dummyHandler).
-		POST("/users", dummyHandler).
-		PUT("/users/1", dummyHandler).
-		DELETE("/users/1", dummyHandler).
-		AddRoute(http.MethodPatch, "/users/1", dummyHandler)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
 
-	tests := []struct {
-		path   string
-		method string
-	}{
-		{"/users", http.MethodGet},
-		{"/users", http.MethodPost},
-		{"/users/1", http.MethodPut},
-		{"/users/1", http.MethodDelete},
-		{"/users/1", http.MethodPatch},
-	}
+	r.ServeHTTP(rec, req)
 
-	for _, tt := range tests {
-		t.Run(tt.method+" "+tt.path, func(t *testing.T) {
-			methodsMap, exists := r.Routes[tt.path]
-			if !exists {
-				t.Fatalf("expected path %q to exist in Routes", tt.path)
-			}
+	res := rec.Result()
+	defer res.Body.Close()
 
-			handler, methodExists := methodsMap[tt.method]
-			if !methodExists {
-				t.Fatalf("expected method %q to exist for path %q", tt.method, tt.path)
-			}
-
-			if handler == nil {
-				t.Errorf("expected non-nil handler for %s %s", tt.method, tt.path)
-			}
-		})
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("want status %d, got %d", http.StatusOK, res.StatusCode)
 	}
 }

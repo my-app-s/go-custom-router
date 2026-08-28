@@ -9,20 +9,20 @@ import (
 	"testing"
 )
 
-// TestNewRouterHandle проверяет корректность инициализации нового роутера.
-func TestNewRouterHandle(t *testing.T) {
-	r := NewRouterHandle()
+// TestNewRouter проверяет корректность инициализации нового роутера.
+func TestNewRouter(t *testing.T) {
+	r := NewRouter()
 	if r == nil {
-		t.Fatal("expected non-nil RouterHandle")
+		t.Fatal("expected non-nil Router")
 	}
-	if r.Routes == nil {
-		t.Error("expected initialized Routes map")
+	if r.routes == nil {
+		t.Error("expected initialized routes map")
 	}
 }
 
 // TestServeHTTP_Routing проверяет корректность диспетчеризации запросов (200, 404, 405).
 func TestServeHTTP_Routing(t *testing.T) {
-	r := NewRouterHandle()
+	r := NewRouter()
 
 	// Регистрируем тестовые эндпоинты
 	r.GET("/api/ping", func(w http.ResponseWriter, req *http.Request) {

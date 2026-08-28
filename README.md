@@ -1,195 +1,118 @@
-# 🛡️ Go Simple Router with Recovery
+# 🛡️ Go Custom Router
 
-## Library Go my custom router
+Библиотека представляет собой легковесный, высокопроизводительный HTTP-роутер и набор утилит, реализованных поверх стандартной библиотеки Go (`net/http`), без использования сторонних тяжеловесных фреймворков.
 
-Библиотека представляет собой минималистичный HTTP-роутер, реализованный поверх стандартной библиотеки Go.
-
-Вместо использования готовых решений проект демонстрирует собственную реализацию механизма маршрутизации.
+---
 
 > [!NOTE]
 > 
+> ![Educational/Experimental Project](https://img.shields.io/badge/Project-Educational%2FExperimental-green)
 > ![Go Version](https://img.shields.io/badge/go-1.25%2B-blue.svg)
 > ![License](https://img.shields.io/badge/license-GNU%20AGPLv3-red.svg)
-> ![status: dev](https://img.shields.io/badge/status-dev-orange)
+> ![status: final](https://img.shields.io/badge/status-final-success)
 > ![CI](https://img.shields.io/badge/CI-GitHub%20Actions-green)
-> ![CI](https://github.com/my-app-s/go-generator/actions/workflows/deploy.yml/badge.svg)
 > ![REST API](https://img.shields.io/badge/REST%20API-green)
 > ![Latest Tag](https://img.shields.io/github/v/tag/my-app-s/go-custom-router)
 
-* Example
-
-```go
-func main() {
-    // 1. Создаем и настраиваем роутер
-    r := router.NewRouterHandle()
-    r.Domain = "mydomain"
-    r.AddRoute("/", welcomeHandler)
-    r.AddRoute("/about", aboutHandler)
-
-    // 2. Одной строкой получаем полностью готовый, обернутый сервер
-    handler := r.Handler()
-
-    // 3. Запускаем
-    log.Println("Server is running on :8080...")
-    if err := http.ListenAndServe(":8080", handler); err != nil {
-        log.Fatal(err)
-    }
-}
-
-```
-
-* Вынесено на слои (разделение ответственности)
-* Реализована защита `RecoveryMiddleware` (обертка)
-* Обязательна для оборачивания, если не используется свой балансировщик выше.
-* Почищен `ServeHTTP` от `defer` для гибкости.
-
-* Example
-
-```go
-package main
-
-import (
-    "log"
-    "net/http"
-    "your_project_name/router" // Замени на путь из твоего go.mod
-)
-
-func main() {
-    // Создаем наш роутер
-    r := router.NewRouterHandle()
-
-    // Добавляем тестовый маршрут
-    r.Routes["/danger"] = map[string]http.HandlerFunc{
-        http.MethodGet: func(w http.ResponseWriter, req *http.Request) {
-            var ptr *string
-            _ = *ptr // Паника! Сервер не упадет благодаря middleware
-        },
-    }
-
-    // Оборачиваем весь роутер в Recovery Middleware
-    var protectedServer http.Handler = r
-    protectedServer = router.RecoveryMiddleware(protectedServer)
-
-    log.Println("Сервер запущен на порту :8080...")
-    if err := http.ListenAndServe(":8080", protectedServer); err != nil {
-        log.Fatal(err)
-    }
-}
-
-```
-
-### Example for dev
-
-```go
-package main
-
-import (
-    "net/http"
-    "time"
-
-    "[github.com/go-chi/chi/v5](https://github.com/go-chi/chi/v5)"
-    "[github.com/go-chi/chi/v5/middleware](https://github.com/go-chi/chi/v5/middleware)"
-    "[github.com/go-chi/cors](https://github.com/go-chi/cors)"
-)
-
-func main() {
-    r := chi.NewRouter()
-
-    // 1. Щит от падений (Recovery)
-    r.Use(middleware.Recoverer)
-
-    // 2. Логгер запросов
-    r.Use(middleware.Logger)
-
-    // 3. Защита от зависаний (таймаут запроса)
-    r.Use(middleware.Timeout(30 * time.Second))
-
-    // 4. CORS (разрешаем запросы только с твоего GitHub Pages)
-    r.Use(cors.Handler(cors.Options{
-        AllowedOrigins:   []string{"[https://твой-аккаунт.github.io](https://твой-аккаунт.github.io)"},
-        AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-        AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-        AllowCredentials: true,
-        MaxAge:           300,
-    }))
-
-    // Твои защищенные ручки
-    r.Get("/api/data", func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte("Привет, это защищенный API!"))
-    })
-
-    http.ListenAndServe(":8080", r)
-}
-
-```
+---
 
 ## 🚀 Основные возможности
 
-* **Panic Recovery**
-Сервер не падает при ошибках — используется перехват паники через middleware.
-* **O(1) Routing**
-Мгновенный поиск маршрутов через `map`.
-* **Fluent API**
-Удобное добавление маршрутов через `AddRoute` или методы с большой буквы (`GET`, `POST` и др.).
-* **CORS & Rate Limiter**
-Встроенная поддержка CORS-политик и защиты от DDoS/брутфорса.
+* **$O(1)$ Average-Case Routing**: Поиск маршрутов и методов основан на встроенных хэш-таблицах Go (`map`), что обеспечивает максимальную скорость диспетчеризации.
+* **Fluent API**: Удобная цепочка вызовов (method chaining) для быстрой регистрации маршрутов (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`).
+* **Встроенный Rate Limiter**: Защита от DDoS и брутфорса на базе алгоритма *Sliding Window Counter* с автоматической очисткой старых записей воркером и поддержкой заголовков прокси (`CF-Connecting-IP`, `X-Forwarded-For`).
+* **Middleware-пакет**: 
+  - `RecoveryMiddleware` — перехват паник с логированием стека вызовов и возвратом `500 Internal Server Error`.
+  - `LoggerMiddleware` — структурированное логирование времени выполнения и статусов запросов.
+  - `ContentTypeJSONMiddleware` — автоматическая установка заголовка `application/json`.
+* **Гибкий CORS**: Настройка разрешенных источников, методов, заголовков и предварительных запросов (`OPTIONS`).
+* **JSON Helpers**: Удобные функции `SendJSON`, `SendError` и `MakeCustomHandler` для быстрой генерации ответов.
+
+---
 
 ## 🛠️ Архитектура
 
-Роутер реализует интерфейс `http.Handler`, что позволяет использовать его напрямую в `http.ListenAndServe`.
+Роутер полностью реализует стандартный интерфейс `http.Handler`, что позволяет бесшовно интегрировать его с любыми стандартными инструментами, балансировщиками и функциями тестирования (`net/http/httptest`).
 
-### Как работает обработка запроса:
+### Порядок обработки запроса:
+1. Логирование входящего запроса (`Logger`).
+2. Перехват возможных паник (`Recovery`).
+3. Установка заголовков (`CORS`, `Content-Type`).
+4. Поиск совпадения по методу и пути в роутере.
+5. Вызов целевого обработчика или возврат `404 Not Found` / `405 Method Not Allowed`.
 
-1. Поиск маршрута в структуре `map`.
-2. Проверка разрешенных HTTP-методов.
-3. Вызов обработчика (`http.HandlerFunc`).
-4. Если маршрут не найден → `404 Not Found`.
+---
 
-## 💻 Использование
+## 💻 Примеры использования
 
-### Main example
+### Базовый запуск с Fluent API
 
 ```go
 package main
 
 import (
-    "net/http"
-    
-    "[github.com/my-app-s/go-custom-router/router](https://github.com/my-app-s/go-custom-router/router)"
+	"log"
+	"net/http"
+
+	"[github.com/my-app-s/go-custom-router/router](https://github.com/my-app-s/go-custom-router/router)"
 )
 
 func main() {
-    r := router.NewRouterHandle()
+	r := router.NewRouter()
 
-    // Registering routes externally
-    r.AddRoute("/", func(w http.ResponseWriter, req *http.Request) {
-        w.Write([]byte("Welcome to custom router!\n"))
-    })
+	// Регистрация маршрутов через Fluent API
+	r.
+		GET("/", func(w http.ResponseWriter, req *http.Request) {
+			_, _ = w.Write([]byte("Welcome to Go Custom Router!\n"))
+		}).
+		GET("/api/ping", router.MakeCustomHandler("status", "pong"))
 
-    http.ListenAndServe(":8080", r)
+	log.Println("Server is running on :8080...")
+	if err := http.ListenAndServe(":8080", r.HandlerAPI()); err != nil {
+		log.Fatal(err)
+	}
 }
 
 ```
 
-### Flexible Route Registration
-
-You can register routes using a standard call or a **Fluent API** (method chaining):
+### Использование Rate Limiter Middleware
 
 ```go
-r := router.NewRouterHandle()
+package main
 
-// Standard style
-r.AddRoute("/main", MainHandler)
+import (
+	"log"
+	"net/http"
+	"time"
 
-// Fluent API style (Chaining)
-r.
-    AddRoute("/test", TestHandler).
-    AddRoute("/login", LoginHandler).
-    AddRoute("/profile", ProfileHandler)
+	"[github.com/my-app-s/go-custom-router/router](https://github.com/my-app-s/go-custom-router/router)"
+)
+
+func main() {
+	r := router.NewRouter()
+
+	// Лимит: 100 запросов в минуту на один IP
+	limiter := router.NewLimiter(100, 1*time.Minute, 5*time.Minute, 10000)
+	defer limiter.Stop()
+
+	r.GET("/api/limited", func(w http.ResponseWriter, req *http.Request) {
+		router.SendJSON(w, http.StatusOK, map[string]string{"message": "Success"})
+	})
+
+	// Оборачиваем роутер или конкретный эндпоинт в лимитер
+	handler := router.RateLimitMiddleware(limiter)(r)
+
+	log.Println("Rate-limited server running on :8080...")
+	_ = http.ListenAndServe(":8080", handler)
+}
 
 ```
 
+---
+
 ## 🧪 Тестирование
+
+Проект покрыт модульными тестами с использованием встроенного пакета `httptest`. Для запуска тестов выполните:
 
 ```bash
 go test -v ./...
@@ -197,23 +120,16 @@ go test -cover
 
 ```
 
-### Handler signature
-
-Your handlers should match the `http.HandlerFunc` signature:
-
-```go
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-    w.Write([]byte("Hello, world!"))
-}
-
-```
+---
 
 ## Disclaimer & License
 
 * **Short Disclaimer (EN)**: Materials are provided ***as is*** under the LICENSE file. No warranties, no rights granted unless explicitly stated. Authors are not liable for damages. No partnership or obligations created.
 * **Short Disclaimer (RU)**: Материалы предоставляются ***как есть*** и регулируются LICENSE. Гарантий нет, права не передаются без явного указания. Автор(ы) не несут ответственности. Партнёрство или обязательства не создаются.
 * **Full Disclaimer**: Read the full text in the [DISCLAIMER.md](https://github.com/my-app-s/my-app-s/blob/main/DISCLAIMER.md) (Available in EN/RU).
-* **License**: Distributed under the [GNU AGPLv3](https://www.google.com/search?q=./LICENSE) license.
+* **License**: This project is dual-licensed:
+- ​Open Source: [GNU AGPLv3](https://github.com/my-app-s/go-custom-router/blob/main/LICENSE)
+- Commercial: A separate proprietary commercial license is available for proprietary and closed-source use. Contact the copyright holder for commercial licensing terms.
 
 ## Author & Contacts
 
