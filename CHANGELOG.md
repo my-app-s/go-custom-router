@@ -192,7 +192,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   [1.6.8]: https://github.com/my-app-s/go-custom-router/compare/v1.6.7...v1.6.8
   [1.6.7]: https://github.com/my-app-s/go-custom-router/releases/tag/v1.6.7
 
-## [1.6.9] - 2026-08-30
+## [1.6.10] - 2026-08-30
 
 ### Fixed
 - Polished disclaimer wording and formatted license links in README
